@@ -41,33 +41,36 @@ const BookRecommendations = () => {
   ];
 
   return (
-    <div className="widget-card h-fit">
-      <div className="flex items-center space-x-2 mb-6">
-        <Sparkles className="h-5 w-5 text-neon-yellow glow-yellow" />
-        <h3 className="text-lg font-semibold text-foreground">AI Recommendations</h3>
+    <div className="rounded-2xl bg-zinc-900/80 border border-white/5 p-5 backdrop-blur-sm h-fit">
+      <div className="flex items-center gap-3 mb-6">
+        <Sparkles className="h-5 w-5 text-yellow-400" />
+        <div>
+          <p className="text-xs text-zinc-400 uppercase tracking-wide">AI Recommendations</p>
+          <h3 className="text-lg font-semibold text-white">Personalized for You</h3>
+        </div>
       </div>
 
       <div className="space-y-4">
         {recommendations.map((book, index) => (
-          <div key={index} className="p-4 bg-muted/50 rounded-lg border border-border/50 hover:border-neon-green/30 transition-all duration-300">
-            <div className="flex items-start space-x-3">
+          <div key={index} className="p-4 bg-zinc-800/50 rounded-xl border border-white/5 hover:border-emerald-500/30 transition-all duration-300">
+            <div className="flex items-start gap-3">
               <div className="text-2xl">{book.cover}</div>
               <div className="flex-1 min-w-0">
-                <h4 className="font-medium text-foreground text-sm truncate">{book.title}</h4>
-                <p className="text-xs text-muted-foreground mb-1">by {book.author}</p>
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="text-xs px-2 py-1 bg-neon-purple/20 text-neon-purple rounded">
+                <h4 className="font-medium text-white text-sm truncate">{book.title}</h4>
+                <p className="text-xs text-zinc-400 mb-1">by {book.author}</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs px-2 py-1 bg-purple-500/20 text-purple-400 rounded-full">
                     {book.genre}
                   </span>
-                  <span className="text-xs text-neon-yellow">★ {book.rating}</span>
+                  <span className="text-xs text-yellow-400">★ {book.rating}</span>
                 </div>
-                <p className="text-xs text-muted-foreground mb-3">{book.reason}</p>
+                <p className="text-xs text-zinc-400 mb-3">{book.reason}</p>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1 text-neon-green">
+                  <div className="flex items-center gap-1 text-emerald-400">
                     <DollarSign className="h-3 w-3" />
                     <span className="text-xs font-medium">{book.price}</span>
                   </div>
-                  <button className="flex items-center space-x-1 text-xs text-neon-blue hover:text-neon-green transition-colors">
+                  <button className="flex items-center gap-1 text-xs text-blue-400 hover:text-emerald-400 transition-colors">
                     <span>View</span>
                     <ExternalLink className="h-3 w-3" />
                   </button>
@@ -78,7 +81,7 @@ const BookRecommendations = () => {
         ))}
       </div>
 
-      <button className="w-full mt-6 py-2 bg-gradient-primary text-primary-foreground rounded-lg font-medium text-sm hover:opacity-90 transition-opacity glow-primary">
+      <button className="w-full mt-6 py-3 bg-emerald-500 text-black rounded-xl font-medium text-sm hover:bg-emerald-400 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/25">
         Get More Recommendations
       </button>
     </div>
