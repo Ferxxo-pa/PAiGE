@@ -1,27 +1,28 @@
-import { BookOpen, Target, Flame, BarChart3, TrendingUp } from "lucide-react";
-import CurrentlyReadingWidget from "@/components/CurrentlyReadingWidget";
-import StreakCounter from "@/components/StreakCounter";
-import GoalsTracker from "@/components/GoalsTracker";
+import { BookOpen } from "lucide-react";
+import ReadingTrackerRow from "@/components/ReadingTrackerRow";
 import BookRecommendations from "@/components/BookRecommendations";
-import ContributionGrid from "@/components/ContributionGrid";
-import AnalyticsDashboard from "@/components/AnalyticsDashboard";
+import CollapsibleReadingActivity from "@/components/CollapsibleReadingActivity";
+
 const Index = () => {
-  return <div className="min-h-screen bg-background">
+  return (
+    <div className="min-h-screen bg-zinc-950">
       {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm">
+      <header className="border-b border-white/5 bg-zinc-900/50 backdrop-blur-sm">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-emerald-500">
+                <BookOpen className="h-6 w-6 text-black" />
+              </div>
               <div>
-                <h1 className="text-2xl font-bold text-neon-green">PAiGE</h1>
-                
+                <h1 className="text-2xl font-bold text-emerald-400">PAiGE</h1>
+                <p className="text-sm text-zinc-400">AI-Powered Reading Companion</p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-4">
               <div className="text-right">
-                
-                
+                <p className="text-sm text-zinc-400">Welcome back</p>
+                <p className="font-semibold text-white">Book Lover</p>
               </div>
             </div>
           </div>
@@ -30,33 +31,25 @@ const Index = () => {
 
       {/* Main Dashboard */}
       <main className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Column - Main Stats */}
-          <div className="lg:col-span-8 space-y-6">
-            {/* Currently Reading & Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2">
-                <CurrentlyReadingWidget />
-              </div>
-              <div className="space-y-4">
-                <StreakCounter />
-                <GoalsTracker />
-              </div>
-            </div>
-
-            {/* Contribution Grid */}
-            <ContributionGrid />
-
-            {/* Analytics Dashboard */}
-            <AnalyticsDashboard />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Reading Trackers */}
+          <div className="lg:col-span-2">
+            <ReadingTrackerRow />
           </div>
 
-          {/* Right Column - Recommendations */}
-          <div className="lg:col-span-4">
+          {/* Right Column - AI Recommendations */}
+          <div className="lg:col-span-1">
             <BookRecommendations />
           </div>
         </div>
+
+        {/* Reading Activity - Below both columns */}
+        <div className="mt-6">
+          <CollapsibleReadingActivity />
+        </div>
       </main>
-    </div>;
+    </div>
+  );
 };
+
 export default Index;
