@@ -1,7 +1,8 @@
 import { BookOpen } from "lucide-react";
-import ReadingTrackerRow from "@/components/ReadingTrackerRow";
+import CurrentlyReadingCard from "@/components/CurrentlyReadingCard";
+import ReadingStreakCard from "@/components/ReadingStreakCard";
 import BookRecommendations from "@/components/BookRecommendations";
-import CollapsibleReadingActivity from "@/components/CollapsibleReadingActivity";
+import ReadingActivityChart from "@/components/ReadingActivityChart";
 
 const Index = () => {
   return (
@@ -31,21 +32,27 @@ const Index = () => {
 
       {/* Main Dashboard */}
       <main className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Reading Trackers */}
-          <div className="lg:col-span-2">
-            <ReadingTrackerRow />
+        {/* Top Row - 3 Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          {/* Currently Reading */}
+          <div>
+            <CurrentlyReadingCard />
           </div>
 
-          {/* Right Column - AI Recommendations */}
-          <div className="lg:col-span-1">
+          {/* Reading Streak */}
+          <div>
+            <ReadingStreakCard />
+          </div>
+
+          {/* AI Recommendations */}
+          <div>
             <BookRecommendations />
           </div>
         </div>
 
-        {/* Reading Activity - Below both columns */}
-        <div className="mt-6">
-          <CollapsibleReadingActivity />
+        {/* Reading Activity - Full Width Below */}
+        <div>
+          <ReadingActivityChart />
         </div>
       </main>
     </div>
