@@ -41,7 +41,7 @@ const BookRecommendations = () => {
   ];
 
   return (
-    <div className="rounded-2xl bg-zinc-900/80 border border-white/5 p-5 backdrop-blur-sm h-fit">
+    <div className="rounded-2xl bg-zinc-900/80 border border-white/5 p-5 backdrop-blur-sm h-full flex flex-col">
       <div className="flex items-center gap-3 mb-6">
         <Sparkles className="h-5 w-5 text-yellow-400" />
         <div>
@@ -50,7 +50,7 @@ const BookRecommendations = () => {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="flex-1 overflow-auto space-y-4">
         {recommendations.map((book, index) => (
           <div key={index} className="p-4 bg-zinc-800/50 rounded-xl border border-white/5 hover:border-emerald-500/30 transition-all duration-300">
             <div className="flex items-start gap-3">
