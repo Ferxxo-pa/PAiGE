@@ -50,7 +50,7 @@ const BookRecommendations = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto space-y-4">
+      <div className="space-y-4 flex-1 overflow-auto">
         {recommendations.map((book, index) => (
           <div key={index} className="p-4 bg-zinc-800/50 rounded-xl border border-white/5 hover:border-emerald-500/30 transition-all duration-300">
             <div className="flex items-start gap-3">

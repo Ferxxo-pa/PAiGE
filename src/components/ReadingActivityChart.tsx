@@ -2,35 +2,48 @@ import { Calendar } from "lucide-react";
 
 const ReadingActivityChart = () => {
   // Generate proper GitHub-style heatmap data
-  const generateContributionData = () => {
+  const generateHeatmapData = () => {
     const today = new Date();
     const currentYear = today.getFullYear();
     
     // Find the Monday of the first week of the year
     const jan1 = new Date(currentYear, 0, 1);
-    const startOfYear = new Date(jan1);
+    const firstMonday = new Date(jan1);
     const dayOfWeek = jan1.getDay();
-    const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Monday = 0
-    startOfYear.setDate(jan1.getDate() - daysToSubtract);
+    const daysToMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek; // If Sunday, go to next Monday
+    firstMonday.setDate(jan1.getDate() + (dayOfWeek === 1 ? 0 : daysToMonday));
+    
+    // If Jan 1 is Monday-Thursday, start from that week's Monday
+    if (dayOfWeek >= 1 && dayOfWeek <= 4) {
+      firstMonday.setDate(jan1.getDate() - (dayOfWeek - 1));
+    }
     
     const weeks = [];
-    const currentDate = new Date(startOfYear);
+    const startDate = new Date(firstMonday);
     
-    // Generate up to 53 weeks
-    while (currentDate <= today && weeks.length < 53) {
+    // Calculate number of weeks to show (up to 53)
+    const weeksToShow = Math.min(53, Math.ceil((today.getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1);
+    
+    for (let weekIndex = 0; weekIndex < weeksToShow; weekIndex++) {
       const week = [];
-      for (let day = 0; day < 7; day++) {
-        const dateStr = currentDate.toISOString().split('T')[0];
-        const pages = Math.floor(Math.random() * 80); // 0-79 pages
+      for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + weekIndex * 7 + dayIndex);
+        
+        // Don't show future dates
+        if (date > today) {
+          week.push(null);
+          continue;
+        }
+        
+        // Generate random pages (0-80 range)
+        const pages = Math.floor(Math.random() * 81);
         
         week.push({
-          date: dateStr,
+          date: date.toISOString().split('T')[0],
           pages,
-          month: currentDate.getMonth(),
-          isCurrentYear: currentDate.getFullYear() === currentYear
+          dateObj: new Date(date)
         });
-        
-        currentDate.setDate(currentDate.getDate() + 1);
       }
       weeks.push(week);
     }
@@ -38,12 +51,11 @@ const ReadingActivityChart = () => {
     return weeks;
   };
 
-  const contributionData = generateContributionData();
-  const totalPages = contributionData.flat()
-    .filter(day => day.isCurrentYear)
-    .reduce((sum, day) => sum + day.pages, 0);
+  const heatmapData = generateHeatmapData();
+  const totalPages = heatmapData.flat().filter(Boolean).reduce((sum, day) => sum + day.pages, 0);
 
-  const getColorByPages = (pages: number) => {
+  // Color buckets based on pages per day
+  const getPagesBucket = (pages: number) => {
     if (pages === 0) return 'bg-zinc-800';
     if (pages <= 10) return 'bg-emerald-700/70';
     if (pages <= 25) return 'bg-emerald-600';
@@ -51,20 +63,26 @@ const ReadingActivityChart = () => {
     return 'bg-emerald-400';
   };
 
-  // Generate month labels
+  // Generate month labels aligned with weeks
   const getMonthLabels = () => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const labels = [];
-    let lastMonth = -1;
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     
-    contributionData.forEach((week, weekIndex) => {
-      const firstDay = week[0];
-      if (firstDay && firstDay.month !== lastMonth && firstDay.isCurrentYear) {
-        labels.push({
-          month: months[firstDay.month],
-          weekIndex
-        });
-        lastMonth = firstDay.month;
+    heatmapData.forEach((week, weekIndex) => {
+      const firstDay = week.find(day => day !== null);
+      if (firstDay) {
+        const date = firstDay.dateObj;
+        const isFirstWeekOfMonth = date.getDate() <= 7;
+        if (isFirstWeekOfMonth || weekIndex === 0) {
+          labels.push({
+            week: weekIndex,
+            month: months[date.getMonth()]
+          });
+        } else {
+          labels.push(null);
+        }
+      } else {
+        labels.push(null);
       }
     });
     
@@ -72,11 +90,10 @@ const ReadingActivityChart = () => {
   };
 
   const monthLabels = getMonthLabels();
-
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   return (
-    <div className="rounded-2xl bg-zinc-900/80 border border-white/5 p-5 backdrop-blur-sm overflow-hidden w-full">
+    <div className="rounded-2xl bg-zinc-900/80 border border-white/5 p-5 backdrop-blur-sm h-full">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Calendar className="h-5 w-5 text-emerald-500" />
@@ -92,76 +109,47 @@ const ReadingActivityChart = () => {
 
       <div className="space-y-4">
         {/* Month labels */}
-        <div className="relative ml-9">
-          <div 
-            className="grid gap-1 text-xs text-zinc-500"
-            style={{ 
-              gridTemplateColumns: `repeat(${contributionData.length}, clamp(9px, 1.1vw, 12px))`,
-            }}
-          >
-            {monthLabels.map((label, index) => (
-              <div 
-                key={index}
-                className="text-left"
-                style={{ gridColumnStart: label.weekIndex + 1 }}
-              >
-                {label.month}
-              </div>
-            ))}
-          </div>
+        <div className="flex gap-1 pl-8 text-xs text-zinc-500">
+          {monthLabels.map((label, index) => (
+            <div key={index} className="w-3 text-center">
+              {label ? label.month : ''}
+            </div>
+          ))}
         </div>
 
         {/* GitHub-style heatmap grid */}
-        <div className="flex">
-          {/* Day labels */}
-          <div className="flex flex-col gap-1 w-8 text-xs text-zinc-500 text-right pr-2">
-            {days.map((day, dayIndex) => (
-              <div 
-                key={day} 
-                className="flex items-center justify-end"
-                style={{ height: 'clamp(9px, 1.1vw, 12px)' }}
-              >
-                {dayIndex % 2 === 0 ? day : ''}
+        <div className="flex flex-col gap-1">
+          {days.map((day, dayIndex) => (
+            <div key={day} className="flex items-center gap-1">
+              <div className="w-6 text-xs text-zinc-500 text-right">
+                {dayIndex % 2 === 0 ? day.slice(0, 1) : ''}
               </div>
-            ))}
-          </div>
-          
-          {/* Heatmap cells */}
-          <div 
-            className="grid gap-1"
-            style={{ 
-              gridTemplateColumns: `repeat(${contributionData.length}, clamp(9px, 1.1vw, 12px))`,
-              gridTemplateRows: 'repeat(7, clamp(9px, 1.1vw, 12px))'
-            }}
-          >
-            {contributionData.map((week, weekIndex) =>
-              week.map((day, dayIndex) => (
-                <div
-                  key={`${weekIndex}-${dayIndex}`}
-                  className={`rounded-[2px] transition-all duration-200 hover:scale-110 hover:shadow-lg hover:shadow-emerald-500/25 cursor-pointer ${getColorByPages(day.pages)}`}
-                  style={{ 
-                    gridColumn: weekIndex + 1,
-                    gridRow: dayIndex + 1,
-                    width: 'clamp(9px, 1.1vw, 12px)',
-                    height: 'clamp(9px, 1.1vw, 12px)'
-                  }}
-                  title={`${day.date} — ${day.pages} pages`}
-                />
-              ))
-            )}
-          </div>
+              <div className="flex gap-1">
+                {heatmapData.map((week, weekIndex) => {
+                  const dayData = week[dayIndex];
+                  return (
+                    <div
+                      key={weekIndex}
+                      className={`w-3 h-3 rounded-sm ${dayData ? getPagesBucket(dayData.pages) : 'bg-zinc-800'} 
+                        transition-all duration-200 hover:scale-110 hover:shadow-lg hover:shadow-emerald-500/25 cursor-pointer`}
+                      title={dayData ? `${dayData.date} — ${dayData.pages} pages` : ''}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Legend */}
         <div className="flex items-center justify-between pt-4 border-t border-white/5">
           <span className="text-xs text-zinc-500">Less</span>
           <div className="flex gap-1">
-            {[0, 10, 25, 50, 75].map((pages, index) => (
-              <div
-                key={index}
-                className={`w-3 h-3 rounded-[2px] ${getColorByPages(pages)}`}
-              />
-            ))}
+            <div className="w-2 h-2 rounded-sm bg-zinc-800" />
+            <div className="w-2 h-2 rounded-sm bg-emerald-700/70" />
+            <div className="w-2 h-2 rounded-sm bg-emerald-600" />
+            <div className="w-2 h-2 rounded-sm bg-emerald-500" />
+            <div className="w-2 h-2 rounded-sm bg-emerald-400" />
           </div>
           <span className="text-xs text-zinc-500">More</span>
         </div>

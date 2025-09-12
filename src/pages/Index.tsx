@@ -31,25 +31,25 @@ const Index = () => {
 
       {/* Main Dashboard */}
       <main className="container mx-auto px-6 py-8">
-        {/* Main Layout - Fixed grid to prevent overlap */}
+        {/* Grid Layout - 3 columns on desktop */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr_360px] gap-6 items-start">
-          {/* Currently Reading Card */}
+          {/* Top Row - Currently Reading */}
           <div className="lg:col-start-1">
             <CurrentlyReadingCard />
           </div>
 
-          {/* Reading Streak Card */}
+          {/* Top Row - Reading Streak */}
           <div className="lg:col-start-2">
             <ReadingStreakCard />
           </div>
 
-          {/* AI Recommendations - spans full height */}
-          <div className="lg:col-start-3 lg:row-span-2 h-full">
+          {/* Right Column - AI Recommendations (spans 2 rows) */}
+          <div className="lg:col-start-3 lg:row-start-1 lg:row-span-2 h-full">
             <BookRecommendations />
           </div>
 
-          {/* Reading Activity - spans first two columns */}
-          <div className="lg:col-start-1 lg:col-end-3 lg:row-start-2">
+          {/* Second Row - Reading Activity (spans first 2 columns) */}
+          <div className="lg:col-start-1 lg:col-span-2 lg:row-start-2">
             <ReadingActivityChart />
           </div>
         </div>
