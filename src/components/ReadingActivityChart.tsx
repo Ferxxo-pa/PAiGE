@@ -41,7 +41,7 @@ const ReadingActivityChart = () => {
   };
 
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   return (
     <div className="rounded-2xl bg-zinc-900/80 border border-white/5 p-5 backdrop-blur-sm">
@@ -67,17 +67,17 @@ const ReadingActivityChart = () => {
         </div>
 
         {/* Heatmap grid */}
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 overflow-x-auto">
           {days.map((day, dayIndex) => (
             <div key={day} className="flex items-center gap-1">
-              <div className="w-8 text-xs text-zinc-500 text-right">
-                {dayIndex % 2 === 0 ? day : ''}
+              <div className="w-4 text-xs text-zinc-500 text-center flex-shrink-0">
+                {day}
               </div>
-              <div className="flex gap-1">
+              <div className="flex gap-1 min-w-fit">
                 {contributionData.map((week, weekIndex) => (
                   <div
                     key={weekIndex}
-                    className={`w-3 h-3 rounded-sm ${getLevelColor(week[dayIndex]?.level || 0)} transition-all duration-200 hover:scale-110 hover:shadow-lg hover:shadow-emerald-500/25`}
+                    className={`w-3 h-3 rounded-sm ${getLevelColor(week[dayIndex]?.level || 0)} transition-all duration-200 hover:scale-110 hover:shadow-lg hover:shadow-emerald-500/25 flex-shrink-0`}
                     title={`${week[dayIndex]?.pages || 0} pages on ${week[dayIndex]?.date}`}
                   />
                 ))}
