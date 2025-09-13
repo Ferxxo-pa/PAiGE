@@ -1,9 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { BookOpen } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 
 const useLocal = (key, init) => {
   const [val, setVal] = useState(() => {
@@ -24,29 +20,18 @@ export default function CurrentlyReadingCard() {
   const [dailyGoal] = useLocal("rt_goal", 25);
   const [weekHits, setWeekHits] = useLocal("rt_week", Array(7).fill(false));
   const [streakDays, setStreakDays] = useLocal("rt_streak", 12);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [pagesInput, setPagesInput] = useState("");
 
   const percent = useMemo(() => Math.min(100, Math.round((book.pagesRead / Math.max(1, book.totalPages)) * 100)), [book]);
 
   const handleReadToday = () => {
-    setDialogOpen(true);
-  };
-
-  const handleSubmitPages = () => {
-    const pages = parseInt(pagesInput);
-    if (pages > 0) {
-      const idx = todayIndex();
-      if (!weekHits[idx]) {
-        const updated = [...weekHits];
-        updated[idx] = true;
-        setWeekHits(updated);
-        setStreakDays(streakDays + 1);
-      }
-      setBook({ ...book, pagesRead: Math.min(book.totalPages, book.pagesRead + pages) });
+    const idx = todayIndex();
+    if (!weekHits[idx]) {
+      const updated = [...weekHits];
+      updated[idx] = true;
+      setWeekHits(updated);
+      setStreakDays(streakDays + 1);
     }
-    setPagesInput("");
-    setDialogOpen(false);
+    setBook({ ...book, pagesRead: Math.min(book.totalPages, book.pagesRead + Math.ceil(dailyGoal * 0.6)) });
   };
 
   return (
@@ -67,53 +52,10 @@ export default function CurrentlyReadingCard() {
         <div className="h-full bg-emerald-500" style={{ width: `${percent}%` }} />
       </div>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogTrigger asChild>
-          <button 
-            onClick={handleReadToday}
-            className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 transition shadow-lg shadow-emerald-600/20">
-            Did you read today?
-          </button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>How many pages did you read today?</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="pages">Pages read</Label>
-              <Input
-                id="pages"
-                type="number"
-                placeholder="Enter number of pages"
-                value={pagesInput}
-                onChange={(e) => setPagesInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSubmitPages();
-                  }
-                }}
-                autoFocus
-              />
-            </div>
-            <div className="flex gap-2 justify-end">
-              <Button 
-                variant="outline" 
-                onClick={() => setDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSubmitPages}
-                disabled={!pagesInput || parseInt(pagesInput) <= 0}
-                className="bg-emerald-600 hover:bg-emerald-500"
-              >
-                Add Pages
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <button onClick={handleReadToday}
+        className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 transition shadow-lg shadow-emerald-600/20">
+        Did you read today?
+      </button>
     </div>
   );
 }
