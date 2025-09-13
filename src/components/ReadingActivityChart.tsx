@@ -41,7 +41,7 @@ const ReadingActivityChart = () => {
   };
 
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const days = ['S', 'M', 'T', 'W', 'R', 'F', 'S'];
+  const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   return (
     <div className="rounded-2xl bg-zinc-900/80 border border-white/5 p-5 backdrop-blur-sm">
