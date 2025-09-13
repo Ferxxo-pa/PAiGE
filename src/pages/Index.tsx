@@ -32,9 +32,9 @@ const Index = () => {
       {/* Main Dashboard */}
       <main className="container mx-auto px-6 py-8">
         {/* Main Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_300px] gap-6">
           {/* Left Column - Reading Cards */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6">
             {/* Top Row - Currently Reading and Streak */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <CurrentlyReadingCard />
