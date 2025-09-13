@@ -41,7 +41,7 @@ const ReadingActivityChart = () => {
   };
 
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   return (
     <div className="rounded-2xl bg-zinc-900/80 border border-white/5 p-5 backdrop-blur-sm">
@@ -69,8 +69,8 @@ const ReadingActivityChart = () => {
         {/* Heatmap grid */}
         <div className="flex flex-col gap-1 overflow-x-auto">
           {days.map((day, dayIndex) => (
-            <div key={day} className="flex items-center gap-3">
-              <div className="w-12 text-xs text-zinc-400 font-medium flex-shrink-0">
+            <div key={day} className="flex items-center gap-1">
+              <div className="w-4 text-xs text-zinc-500 text-center flex-shrink-0">
                 {day}
               </div>
               <div className="flex gap-1 min-w-fit">
