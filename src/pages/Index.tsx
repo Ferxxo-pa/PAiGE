@@ -1,53 +1,10 @@
-import { useState } from "react";
-import { User, LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
-import { useReadingData } from "@/hooks/useReadingData";
-import { AuthModal } from "@/components/Auth/AuthModal";
+import { User } from "lucide-react";
 import CurrentlyReadingCard from "@/components/CurrentlyReadingCard";
 import ReadingStreakCard from "@/components/ReadingStreakCard";
 import BookRecommendations from "@/components/BookRecommendations";
 import ReadingActivityChart from "@/components/ReadingActivityChart";
 
 const Index = () => {
-  const { user, signOut, loading: authLoading } = useAuth();
-  const { loading: dataLoading } = useReadingData();
-  const [showAuthModal, setShowAuthModal] = useState(false);
-
-  if (authLoading || dataLoading) {
-    return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-12 h-12 bg-emerald-500 rounded-full animate-pulse mx-auto"></div>
-          <p className="text-zinc-400">Loading your reading journey...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="text-center space-y-6 max-w-md mx-auto p-6">
-          <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto">
-            <User className="h-8 w-8 text-black" />
-          </div>
-          <h1 className="text-4xl font-bold text-emerald-400">Welcome to PAiGE</h1>
-          <p className="text-lg text-zinc-400">
-            Your personal AI-powered reading companion. Track your progress, discover new books, and build lasting reading habits.
-          </p>
-          <Button 
-            onClick={() => setShowAuthModal(true)}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-8 py-3"
-          >
-            Start Reading Journey
-          </Button>
-        </div>
-        <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-zinc-950">
       {/* Header */}
@@ -61,14 +18,10 @@ const Index = () => {
               <div className="flex items-center gap-3">
                 <div className="text-right">
                   <p className="text-sm text-zinc-400">Welcome back</p>
-                  <p className="font-semibold text-white">{user.email?.split('@')[0] || 'Book Lover'}</p>
+                  <p className="font-semibold text-white">Book Lover</p>
                 </div>
-                <button 
-                  onClick={signOut}
-                  className="p-2 rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors"
-                  title="Sign Out"
-                >
-                  <LogOut className="h-5 w-5 text-zinc-400" />
+                <button className="p-2 rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors">
+                  <User className="h-5 w-5 text-zinc-400" />
                 </button>
               </div>
             </div>
