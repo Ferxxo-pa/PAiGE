@@ -1,50 +1,66 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { BookOpen } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-
-const useLocal = (key, init) => {
-  const [val, setVal] = useState(() => {
-    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : init; } catch { return init; }
-  });
-  useEffect(() => { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }, [key, val]);
-  return [val, setVal];
-};
-
-const todayIndex = () => (new Date().getDay() + 6) % 7; // Mon=0
+import { useReadingData } from "@/hooks/useReadingData";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CurrentlyReadingCard() {
-  const [book, setBook] = useLocal("rt_book", {
-    title: "The Midnight Library",
-    totalPages: 432,
-    pagesRead: 187,
-  });
-  const [dailyGoal] = useLocal("rt_goal", 25);
-  const [weekHits, setWeekHits] = useLocal("rt_week", Array(7).fill(false));
-  const [streakDays, setStreakDays] = useLocal("rt_streak", 12);
+  const { user } = useAuth();
+  const { books, profile, addReadingSession, upsertBook } = useReadingData();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pagesInput, setPagesInput] = useState("");
+  const { toast } = useToast();
 
-  const percent = useMemo(() => Math.min(100, Math.round((book.pagesRead / Math.max(1, book.totalPages)) * 100)), [book]);
-
-  const handleReadToday = () => {
-    setDialogOpen(true);
+  // Get current reading book (first book with status 'reading')
+  const currentBook = books.find(book => book.status === 'reading') || books[0];
+  
+  // Default to sample data if no books exist yet
+  const displayBook = currentBook || {
+    id: '',
+    title: "The Midnight Library",
+    author: "Matt Haig",
+    total_pages: 432,
+    pages_read: 187,
+    status: 'reading' as const,
   };
 
-  const handleSubmitPages = () => {
+  const percent = useMemo(() => 
+    Math.min(100, Math.round((displayBook.pages_read / Math.max(1, displayBook.total_pages)) * 100)), 
+    [displayBook.pages_read, displayBook.total_pages]
+  );
+
+  const handleSubmitPages = async () => {
     const pages = parseInt(pagesInput);
-    if (pages > 0) {
-      const idx = todayIndex();
-      if (!weekHits[idx]) {
-        const updated = [...weekHits];
-        updated[idx] = true;
-        setWeekHits(updated);
-        setStreakDays(streakDays + 1);
-      }
-      setBook({ ...book, pagesRead: Math.min(book.totalPages, book.pagesRead + pages) });
+    if (!pages || pages <= 0) {
+      toast({
+        title: "Invalid input",
+        description: "Please enter a valid number of pages.",
+        variant: "destructive",
+      });
+      return;
     }
+
+    if (!currentBook && user) {
+      // Create the default book if it doesn't exist
+      const newBook = await upsertBook({
+        title: displayBook.title,
+        author: displayBook.author,
+        total_pages: displayBook.total_pages,
+        pages_read: displayBook.pages_read,
+        status: 'reading',
+      });
+      
+      if (newBook) {
+        await addReadingSession(newBook.id, pages);
+      }
+    } else if (currentBook) {
+      await addReadingSession(currentBook.id, pages);
+    }
+
     setPagesInput("");
     setDialogOpen(false);
   };
@@ -55,12 +71,15 @@ export default function CurrentlyReadingCard() {
         <BookOpen className="h-6 w-6 text-emerald-400"/>
         <div>
           <div className="text-xs text-zinc-400">CURRENTLY READING</div>
-          <div className="text-lg font-semibold">{book.title}</div>
+          <div className="text-lg font-semibold">{displayBook.title}</div>
+          {displayBook.author && (
+            <div className="text-sm text-zinc-500">by {displayBook.author}</div>
+          )}
         </div>
       </div>
 
       <div className="mb-2 flex justify-between text-sm">
-        <span>{book.pagesRead}/{book.totalPages} pages</span>
+        <span>{displayBook.pages_read}/{displayBook.total_pages} pages</span>
         <span>{percent}%</span>
       </div>
       <div className="h-2 rounded-full bg-zinc-800 overflow-hidden mb-6">
@@ -70,18 +89,17 @@ export default function CurrentlyReadingCard() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
           <button 
-            onClick={handleReadToday}
             className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 transition shadow-lg shadow-emerald-600/20">
             Did you read today?
           </button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-zinc-900 border-zinc-800">
           <DialogHeader>
-            <DialogTitle>How many pages did you read today?</DialogTitle>
+            <DialogTitle className="text-white">How many pages did you read today?</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="pages">Pages read</Label>
+              <Label htmlFor="pages" className="text-zinc-300">Pages read</Label>
               <Input
                 id="pages"
                 type="number"
@@ -93,6 +111,7 @@ export default function CurrentlyReadingCard() {
                     handleSubmitPages();
                   }
                 }}
+                className="bg-zinc-800 border-zinc-700 text-white"
                 autoFocus
               />
             </div>
@@ -100,13 +119,14 @@ export default function CurrentlyReadingCard() {
               <Button 
                 variant="outline" 
                 onClick={() => setDialogOpen(false)}
+                className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
               >
                 Cancel
               </Button>
               <Button 
                 onClick={handleSubmitPages}
                 disabled={!pagesInput || parseInt(pagesInput) <= 0}
-                className="bg-emerald-600 hover:bg-emerald-500"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white"
               >
                 Add Pages
               </Button>

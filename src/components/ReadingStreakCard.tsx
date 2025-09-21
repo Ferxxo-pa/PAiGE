@@ -1,27 +1,39 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { Flame } from "lucide-react";
-
-const useLocal = (key, init) => {
-  const [val, setVal] = useState(() => {
-    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : init; } catch { return init; }
-  });
-  useEffect(() => { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }, [key, val]);
-  return [val, setVal];
-};
+import { useReadingData } from "@/hooks/useReadingData";
 
 const WEEK = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
 export default function ReadingStreakCard() {
-  const [book] = useLocal("rt_book", {
-    title: "The Midnight Library",
-    totalPages: 432,
-    pagesRead: 187,
-  });
-  const [dailyGoal] = useLocal("rt_goal", 25);
-  const [weekHits] = useLocal("rt_week", Array(7).fill(false));
-  const [streakDays] = useLocal("rt_streak", 12);
-
-  const progress = useMemo(() => Math.min(1, (book.pagesRead % dailyGoal) / dailyGoal), [book.pagesRead, dailyGoal]);
+  const { books, sessions, profile, calculateStreak } = useReadingData();
+  
+  const currentBook = books.find(book => book.status === 'reading') || books[0];
+  const dailyGoal = profile?.daily_goal || 25;
+  const streakDays = calculateStreak();
+  
+  // Calculate today's progress based on sessions
+  const today = new Date().toISOString().split('T')[0];
+  const todaySessions = sessions.filter(session => session.session_date === today);
+  const todayPages = todaySessions.reduce((sum, session) => sum + session.pages_read, 0);
+  
+  const progress = useMemo(() => Math.min(1, todayPages / dailyGoal), [todayPages, dailyGoal]);
+  
+  // Calculate week hits from sessions
+  const weekHits = useMemo(() => {
+    const hits = Array(7).fill(false);
+    const today = new Date();
+    
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      const dayIndex = (7 - i) % 7; // Current week mapping
+      hits[dayIndex] = sessions.some(session => session.session_date === dateStr);
+    }
+    
+    return hits;
+  }, [sessions]);
 
   return (
     <div className="rounded-2xl bg-zinc-900/80 border border-white/5 p-5 flex flex-col justify-between text-white">
@@ -48,7 +60,7 @@ export default function ReadingStreakCard() {
       </div>
 
       <div className="flex justify-between text-sm mb-1">
-        <span>{Math.min(book.pagesRead % dailyGoal, dailyGoal)}/{dailyGoal} pages today</span>
+        <span>{todayPages}/{dailyGoal} pages today</span>
         <span>{Math.round(progress * 100)}%</span>
       </div>
       <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
